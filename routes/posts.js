@@ -14,12 +14,13 @@ router.post("/", upload.array('uploads', 4), async (req, res) => {
     if (!files.length === 0) {
         const error = new Error('Please upload a file')
         error.httpStatusCode = 400
+        res.status(400).json("No image selected");
         return next("hey error")
     }
     let filePaths = [];
 
-    files.forEach((element) => {
-        filePaths.push(element.path);
+    files.forEach((file) => {
+        filePaths.push(`https://go-find-me.herokuapp.com/api/posts/${element.filename}`);
     });
     req.body.imgs = filePaths;
 

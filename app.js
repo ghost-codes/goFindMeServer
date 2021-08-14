@@ -11,12 +11,23 @@ const helmet = require('helmet');
 
 dotenv.config();
 
+
+
 mongoose.connect(
     process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true },
-    () => {
+    (error, db) => {
+        // connecting to gridFs on mongo
+
+        if (error) return console.dir(error);
+
+        var grid = new grid(db, 'fs')
+
+
+
         console.log("Connected to MongoDB");
     }
 );
+
 
 const app = express();
 const port = process.env.PORT || 3000;
