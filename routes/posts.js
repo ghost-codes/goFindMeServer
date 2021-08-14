@@ -4,8 +4,12 @@ const upload = require("../middleware/upload");
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
+const { ReadStream } = require('fs');
 
-
+var conn = mongoose.connection();
+conn.once('open', () => {
+    gfs = Grid(conn.db);
+})
 
 // create a post\
 router.post("/", upload.array('uploads', 4), async (req, res) => {
@@ -34,8 +38,20 @@ router.post("/", upload.array('uploads', 4), async (req, res) => {
         console.log(err);
         res.status(500).json(err);
     }
-})
+});
 
+router.get('/:filename', (req, res) => {
+    const filename = req.params.filename;
+
+    try {
+        const file = await gfs.files.findOne({ filename: req.params.filename });
+        const readSream = gfs.createReadStream(file.filename);
+
+        readStream.pipe(res);
+    } catch (err) {
+        res.json(err);
+    }
+})
 // update a post
 router.put("/:postId", async (req, res) => {
     try {
