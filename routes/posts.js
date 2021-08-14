@@ -20,7 +20,7 @@ router.post("/", upload.array('uploads', 4), async (req, res) => {
     let filePaths = [];
 
     files.forEach((file) => {
-        filePaths.push(`https://go-find-me.herokuapp.com/api/posts/${element.filename}`);
+        filePaths.push(`https://go-find-me.herokuapp.com/api/posts/${file.filename}`);
     });
     req.body.imgs = filePaths;
 
