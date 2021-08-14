@@ -35,9 +35,12 @@ var storage = multer.diskStorage({
     }
 });
 
+// checkking connection
 app.get('/api/', (req, res) => {
     res.json("Connected");
-})
+});
+
+// Trying gridfs for image storage
 
 app.use("/api/posts", postRoute);
 
