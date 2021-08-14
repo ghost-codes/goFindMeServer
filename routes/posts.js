@@ -1,15 +1,13 @@
 const router = require('express').Router();
 const Post = require("../models/Post");
 const upload = require("../middleware/upload");
+const mongoose = require("mongoose")
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
-const { ReadStream } = require('fs');
+const Grid = require('gridfs-stream');
 
-var conn = mongoose.connection();
-conn.once('open', () => {
-    gfs = Grid(conn.db);
-})
+
 
 // create a post\
 router.post("/", upload.array('uploads', 4), async (req, res) => {
@@ -24,7 +22,7 @@ router.post("/", upload.array('uploads', 4), async (req, res) => {
     let filePaths = [];
 
     files.forEach((file) => {
-        filePaths.push(`https://go-find-me.herokuapp.com/api/posts/${file.filename}`);
+        filePaths.push(`${req.protocol}://${req.get("host")}/api/posts/${file.filename}`);
     });
     req.body.imgs = filePaths;
 
@@ -36,22 +34,25 @@ router.post("/", upload.array('uploads', 4), async (req, res) => {
         res.status(200).json(savedPost);
     } catch (err) {
         console.log(err);
+        con
         res.status(500).json(err);
     }
 });
 
-router.get('/:filename', (req, res) => {
-    const filename = req.params.filename;
+// router.get('/:filename', async (req, res) => {
+//     const filename = req.params.filename;
 
-    try {
-        const file = await gfs.files.findOne({ filename: req.params.filename });
-        const readSream = gfs.createReadStream(file.filename);
+//     try {
+//         console.log(gfs);
+//         const file = await gfs.files.find({ filename: req.params.filename });
+//         const readSream = gfs.createReadStream(file.filename);
 
-        readStream.pipe(res);
-    } catch (err) {
-        res.json(err);
-    }
-})
+//         readStream.pipe(res);
+//     } catch (err) {
+//         console.log(err);
+//         res.json("err");
+//     }
+// })
 // update a post
 router.put("/:postId", async (req, res) => {
     try {

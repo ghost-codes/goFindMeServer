@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const gfs = require('gridfs-stream');
+const Grid = require('gridfs-stream');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
@@ -14,12 +14,19 @@ dotenv.config();
 
 
 
+let gfs;
 mongoose.connect(
     process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true },
     (error, db) => {
         console.log("Connected to MongoDB");
     }
 );
+
+const conn = mongoose.createConnection(process.env.MONGO_URL,);
+
+conn.once("open", () => {
+    gfs = Grid(conn.db, mongoose.mongo);
+})
 
 
 
@@ -46,9 +53,26 @@ app.get('/api/', (req, res) => {
     res.json("Connected");
 });
 
+app.use("/api/posts", postRoute);
+
+// managing file and media retrieval
+app.get('/api/post/:filename', async (req, res) => {
+    const filename = req.params.filename;
+
+    try {
+
+        const file = await gfs.files.findOne({ filename: req.params.filename });
+        console.log(file.filename);
+        const readSream = gfs.createReadStream(file.filename);
+
+        readSream.pipe(res);
+    } catch (err) {
+        console.log(err);
+        res.json("err");
+    }
+});
 // Trying gridfs for image storage
 
-app.use("/api/posts", postRoute);
 
 
 // Start Server
