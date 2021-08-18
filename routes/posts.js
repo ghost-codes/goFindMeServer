@@ -9,6 +9,20 @@ const Grid = require('gridfs-stream');
 
 
 
+// Fetch all posts
+router.get("/", async (req, res) => {
+    try {
+        const posts = await Post.find({});
+        if (post) {
+            res.status(200).json(post);
+        } else {
+            res.status(404).json("Post not found");
+        }
+    } catch (err) {
+        res.status(500).json(e);
+    }
+});
+
 // create a post\
 router.post("/", upload.array('uploads', 4), async (req, res) => {
 
@@ -82,6 +96,8 @@ router.delete("/:postId", async (req, res) => {
         res.status(500).json(err);
     }
 });
+
+
 
 
 // contribute to a post
