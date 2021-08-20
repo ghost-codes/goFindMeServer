@@ -36,7 +36,7 @@ router.post("/", upload.array('uploads', 4), async (req, res) => {
     let filePaths = [];
 
     files.forEach((file) => {
-        filePaths.push(`${req.protocol}://${req.get("host")}/api/posts/${file.filename}`);
+        filePaths.push(`${req.protocol}://${req.get("host")}/api/post/${file.filename}`);
     });
     req.body.imgs = filePaths;
 
