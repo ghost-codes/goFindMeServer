@@ -20,7 +20,7 @@ const PostSchema = new mongoose.Schema({
             type: String,
         },
         count: {
-            type: Integer,
+            type: Number,
         }
     },
     privilleged: {
