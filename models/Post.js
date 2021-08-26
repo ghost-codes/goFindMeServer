@@ -7,7 +7,6 @@ const PostSchema = new mongoose.Schema({
     },
     imgs: {
         type: Array,
-
     },
     title: {
         type: String,
@@ -17,8 +16,12 @@ const PostSchema = new mongoose.Schema({
         max: 500
     },
     contributions: {
-        type: Array,
-        default: [],
+        id: {
+            type: String,
+        },
+        count: {
+            type: Integer,
+        }
     },
     privilleged: {
         type: Array,
@@ -31,7 +34,19 @@ const PostSchema = new mongoose.Schema({
     shares: {
         type: Number,
         default: 0,
-    }
+    },
+    last_seen: {
+        location: {
+            type: String,
+
+        },
+        date: {
+            type: Date,
+            required: true,
+        }
+    },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 })
 
 module.exports = mongoose.model("Post", PostSchema);
