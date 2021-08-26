@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
 });
 
 // create a post\
-router.post("/", upload.array('uploads', 4), async (req, res) => {
+router.post("/", upload.array('uploads', 8), async (req, res) => {
 
     const files = req.files
     if (!files.length === 0) {

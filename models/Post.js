@@ -16,12 +16,8 @@ const PostSchema = new mongoose.Schema({
         max: 500
     },
     contributions: {
-        id: {
-            type: String,
-        },
-        count: {
-            type: Number,
-        }
+        type: Array,
+        default: []
     },
     privilleged: {
         type: Array,
