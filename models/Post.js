@@ -47,9 +47,9 @@ const PostSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date(new Date.now)
+        default: Date.now
     },
-    updatedAt: { type: Date, default: Date(new Date.now) }
+    updatedAt: { type: Date, default: new Date.now }
 })
 
 module.exports = mongoose.model("Post", PostSchema);
