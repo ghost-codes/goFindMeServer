@@ -7,6 +7,7 @@ const path = require('path');
 const multer = require('multer');
 
 // Routes import
+const contributionRoute = require('./routes/contributions');
 const postRoute = require('./routes/posts');
 const helmet = require('helmet');
 
@@ -54,6 +55,7 @@ app.get('/api/', (req, res) => {
 });
 
 app.use("/api/posts", postRoute);
+app.use("/api/contributions", contributionRoute);
 
 // managing file and media retrieval
 app.get('/api/post/:filename', async (req, res) => {
