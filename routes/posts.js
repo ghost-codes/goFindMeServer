@@ -53,22 +53,24 @@ router.post("/", upload.array('uploads', 8), async (req, res) => {
     }
 });
 
-// router.get('/:filename', async (req, res) => {
-//     const filename = req.params.filename;
 
-//     try {
-//         console.log(gfs);
-//         const file = await gfs.files.find({ filename: req.params.filename });
-//         const readSream = gfs.createReadStream(file.filename);
-
-//         readStream.pipe(res);
-//     } catch (err) {
-//         console.log(err);
-//         res.json("err");
-//     }
-// })
 // update a post
-router.put("/:postId", async (req, res) => {
+router.put("/:postId", upload.array('uploads', 8), async (req, res) => {
+    const files = req.files
+    if (!files.length === 0) {
+        const error = new Error('Please upload a file')
+        error.httpStatusCode = 400
+        res.status(400).json("No image selected");
+        return next("hey error")
+    }
+    let filePaths = [];
+
+    files.forEach((file) => {
+        filePaths.push(`${req.protocol}://${req.get("host")}/api/post/${file.filename}`);
+    });
+    req.body.imgs = filePaths;
+
+
     try {
         const post = await Post.findById(req.params.postId);
         if (post.userId === req.body.userId) {
