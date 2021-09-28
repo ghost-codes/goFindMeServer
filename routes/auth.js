@@ -1,41 +1,48 @@
-const users = [
-    {
-        id: "1",
-        username: "john",
-        password: "John0908",
-        isAdmin: true,
-    },
-    {
-        id: "1",
-        username: "jane",
-        password: "Jane0908",
-        isAdmin: false,
-    }
-];
+const User = require('../models/User')
+const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 let refreshTokens = [];
 
-const secret = "myScreteKey";
-const refreshSecret = "MyRefreshSecreteKey";
+const secret = "AccessTokenForGoFindMeServerHope";
+const refreshSecret = "RefreshTokenforGoFindMeServerHope";
 
 
 
 const generateAccessToken = (user) => {
-    return jwt.sign({ id: user.id, isAdmin: user.isAdmin }, secret, { expiresIn: "15m", });
+    return jwt.sign({ id: user.id }, secret, { expiresIn: "15m", });
 }
 
 const generateRefreshToken = (user) => {
-    return jwt.sign({ id: user.id, isAdmin: user.isAdmin }, refreshSecret, { expiresIn: "15m", });
+    return jwt.sign({ id: user.id }, refreshSecret, { expiresIn: "15m", });
 }
 
+// Sing Up new user with email and password
+router.post("/sign_up/email", async (req, res) => {
+    const body = req.body;
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+    bcrypt.hash(body.password, 10, async (err, hash) => {
+        if (!err) {
+            body.password = hash;
+            const newUser = new User(body);
+            try {
+                const savedUser = await newUser.save();
+                const accessToken = generateAccessToken(savedUser);
+                const refreshToken = generateRefreshToken(savedUser);
+                res.status(200).json({ message: "Sign up successfull", user: { id: savedUser.id, username: savedUser, photo_url: savedUser.photo_url, email: savedUser.email, }, accessToken, refreshToken })
+            } catch (e) {
+                console.log(e);
+                res.status(500).json({ e });
+            }
+        } else {
+            res.status(500).json({ err: err });
+        }
+    })
 
+})
 
-
-app.post("/api/refresh", (req, res) => {
+router.post("/refresh", (req, res) => {
     // take the refresh token from the user
     const token = req.body.token;
 
@@ -64,31 +71,46 @@ app.post("/api/refresh", (req, res) => {
     // if everything is oh, create new access token, refresh token and send to user
 });
 
+// Login using email and password
+router.post('/login/email', async (req, res) => {
 
-// creating token on user login
-app.post('/api/login', (req, res) => {
+    const { identity, password } = req.body;
+    try {
+        const user = await User.findOne({ $or: [{ username: identity }, { email: identity }] });
+        if (user) {
+            // Bcrypt password
+            bcrypt.compare(password, user.password, async (err, result) => {
 
-    const { username, password } = req.body;
-    const user = users.find(u => {
-        return u.username === username && u.password === password;
-    });
-    if (user) {
-        // Generate and access token
-        const accessToken = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
+                if (!err) { // Generate and access token
+                    const accessToken = generateAccessToken(user);
+                    const refreshToken = generateRefreshToken(user);
+                    res.status(200).send({
+                        user: {
+                            username: user.username,
+                            email: user.email,
+                            photo_url: user.photo_url,
 
-        res.status(200).send({
-            username: user.username,
-            isAdmin: user.isAdmin,
-            accessToken: accessToken
-        });
-    } else {
-        res.status(400).send("Username or password incorrect");
+                        },
+                        accessToken: accessToken,
+                        refreshToken: refreshToken,
+
+                    });
+                } else {
+                    res.status(400).json({ message: "Authentication Failed: Unauthorized Credentials" });
+                }
+            })
+
+        } else {
+            res.status(400).json({ message: "Authentication Failed: Unauthorized Credentials" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ err });
     }
 });
 
-
-
+// Login user using Google Id
+router.post('/login/google_auth', async (req, res) => { });
 
 // Verify Token function(Middleware)
 const verify = (req, res, next) => {
@@ -113,12 +135,13 @@ const verify = (req, res, next) => {
     }
 }
 
-
 // Delete a user
-app.delete("/api/users/:userId", verify, (req, res) => {
+router.delete("/users/:userId", verify, (req, res) => {
     if (req.user.id === req.params.userId || req.user.isAdmin) {
         res.status(200).json("User has been deleted");
     } else {
         res.status(403).json("You are not allowed to delete this user");
     }
 });
+
+module.exports = router;

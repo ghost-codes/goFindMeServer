@@ -7,15 +7,14 @@ const path = require('path');
 const Post = require('./models/Post');
 const Contribution = require('./models/Contribution');
 const multer = require('multer');
+const helmet = require('helmet');
 
 // Routes import
 const contributionRoute = require('./routes/contributions');
 const postRoute = require('./routes/posts');
-const helmet = require('helmet');
+const auth = require('./routes/auth');
 
 dotenv.config();
-
-
 
 let gfs;
 mongoose.connect(
@@ -51,13 +50,14 @@ var storage = multer.diskStorage({
     }
 });
 
-// checkking connection
+// checking connection
 app.get('/api/', (req, res) => {
     res.json("Connected");
 });
 
 app.use("/api/posts", postRoute);
 app.use("/api/contributions", contributionRoute);
+app.use("/api/users", auth);
 
 
 app.delete("/api/posts/post/:postId", async (req, res) => {

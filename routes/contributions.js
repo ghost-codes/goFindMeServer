@@ -7,9 +7,7 @@ const Post = require("../models/Post");
 router.post("/", async (req, res) => {
     const newContribution = new Contribution(req.body);
     try {
-        console.log(req.body);
         const savedContribution = await newContribution.save();
-        console.log(savedContribution);
         const post = await Post.findById(savedContribution.post_id);
         post.contributions = [savedContribution.id];
         await post.updateOne({ $set: post });

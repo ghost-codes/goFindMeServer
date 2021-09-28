@@ -48,7 +48,7 @@ router.post("/", upload.array('uploads', 8), async (req, res) => {
         res.status(200).json(savedPost);
     } catch (err) {
         console.log(err);
-        con
+
         res.status(500).json(err);
     }
 });
